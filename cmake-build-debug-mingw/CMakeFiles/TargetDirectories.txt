@@ -1,0 +1,3 @@
+C:/Users/HP/CLionProjects/Security_System/cmake-build-debug-mingw/CMakeFiles/Security_System.dir
+C:/Users/HP/CLionProjects/Security_System/cmake-build-debug-mingw/CMakeFiles/edit_cache.dir
+C:/Users/HP/CLionProjects/Security_System/cmake-build-debug-mingw/CMakeFiles/rebuild_cache.dir
