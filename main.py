@@ -17,9 +17,6 @@ class App:
         self.background_image = None
 
     def validate_email(self, email):
-        """
-        Validate the email using a regular expression.
-        """
         pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
         return bool(re.match(pattern, email))
 
