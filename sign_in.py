@@ -3,12 +3,10 @@ from tkinter import messagebox
 from PIL import Image, ImageTk
 import re
 
-login_window = Tk()
 
-login_window.geometry('1000x600')
-login_window.title('Registration Form')
-login_window.configure(bg="#fff")
-login_window.resizable(False, False)
+def signup_page():
+    login_window.destroy()
+    import sign_up
 
 
 def hide_input():
@@ -54,8 +52,15 @@ def sign_in():
         messagebox.showerror('Incorrect input data', 'Invalid email or password')
 
 
+login_window = Tk()
+
+login_window.geometry('1000x600')
+login_window.title('Login Form')
+login_window.configure(bg="#fff")
+login_window.resizable(False, False)
+
 image_open = Image.open("img4.jpg")
-image_open = image_open.resize((500, 500))
+image_open = image_open.resize((600, 600))
 img = ImageTk.PhotoImage(image_open)
 
 Label(login_window, image=img, bg='white').place(x=50, y=50, height=500, width=550)
@@ -127,9 +132,11 @@ sign_in_button = Button(frame, width=39, pady=7, text='Sign in', bg='#57a1f8', f
                         activebackground='#57a1f8')
 sign_in_button.place(x=30, y=215)
 
-label = Label(frame, text='Dont have an account?', fg='black', bg='white', font=('Microsoft YaHei UI Light', 9))
-label.place(x=65, y=300)
+no_account_label = Label(frame, text='Dont have an account?', fg='black', bg='white',
+                         font=('Microsoft YaHei UI Light', 9))
+no_account_label.place(x=65, y=300)
 
-sign_up_button = Button(frame, width=6, text='Sign up', border=0, bg='white', cursor='hand2', fg='#57a1f8')
+sign_up_button = Button(frame, width=6, text='Sign up', border=0, bg='white', cursor='hand2', fg='#57a1f8',
+                        command=signup_page)
 sign_up_button.place(x=200, y=300)
 login_window.mainloop()
