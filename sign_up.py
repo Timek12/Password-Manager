@@ -98,7 +98,7 @@ frame = Frame(signup_window, bg='white')
 frame.place(x=550, y=60)
 
 heading = Label(frame, text='Create an account', fg=forestgreen, bg='white',
-                font=('Microsoft YaHei UI Light', 22, 'bold'))
+                font=('Microsoft YaHei UI Light', 24, 'bold'))
 heading.grid(row=0, column=0, padx=10, pady=10)
 
 email_label = Label(frame, text='Email', font=('Microsoft YaHei UI Light', 11), bg='white')
@@ -116,25 +116,25 @@ username_entry.grid(row=4, column=0, sticky='w', pady=4)
 password_label = Label(frame, text='Password', font=('Microsoft YaHei UI Light', 11), bg='white')
 password_label.grid(row=5, column=0, sticky='w', pady=4)
 
-password_entry = Entry(frame, width=35, fg='black', border=1, bg='white', font=('Microsoft YaHei UI Light', 9))
+password_entry = Entry(frame, width=30, fg='black', border=1, bg='white', font=('Microsoft YaHei UI Light', 11))
 password_entry.grid(row=6, column=0, sticky='w', pady=4)
 
 confirm_password_label = Label(frame, text='Confirm Password', font=('Microsoft YaHei UI Light', 11), bg='white')
 confirm_password_label.grid(row=7, column=0, sticky='w', pady=4)
 
-confirm_password_entry = Entry(frame, width=35, fg='black', border=1, bg='white', font=('Microsoft YaHei UI Light', 9))
+confirm_password_entry = Entry(frame, width=30, fg='black', border=1, bg='white', font=('Microsoft YaHei UI Light', 11))
 confirm_password_entry.grid(row=8, column=0, sticky='w', pady=4)
 
 check_agreement = IntVar()
 
-terms_confirmation = Checkbutton(frame, text='I agree to Terms & Conditions', font=('Microsoft YaHei UI Light', 9),
+terms_confirmation = Checkbutton(frame, text='I agree to Terms & Conditions', font=('Microsoft YaHei UI Light', 11),
                                  bg='white', fg=forestgreen, activebackground='white', activeforeground=forestgreen,
                                  cursor='hand2', variable=check_agreement)
 terms_confirmation.grid(row=9, column=0, sticky='w', pady=4)
 
 sign_up_button = Button(frame, text='Sign up', width=35, height=2, font=('Microsoft YaHei UI Light', 12), bg=limegreen,
                         fg='white',
-                        activebackground='#57a1f8', activeforeground='white', cursor='hand2', border=0,
+                        activebackground=limegreen, activeforeground='white', cursor='hand2', border=0,
                         command=connect_database)
 sign_up_button.grid(row=10, column=0, sticky='w', pady=4)
 

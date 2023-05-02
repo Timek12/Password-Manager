@@ -1,19 +1,28 @@
+import re
+import secrets
+import smtplib
+import string
+import time
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from tkinter import *
 from tkinter import messagebox
-from PIL import Image, ImageTk
-import re
-import pymysql
 
-# sign in label, sign in button and sign up button
+import pymysql
+from PIL import Image, ImageTk
 
 limegreen = '#32CD32'
 green = '#008000'
 forestgreen = '#228B22'
 
 
+def clear_entry_fields():
+    email_entry.delete(0, END)
+    password_entry.delete(0, END)
+
+
 def signup_page():
     login_window.destroy()
-    import sign_up
 
 
 def hide_input():
@@ -50,8 +59,14 @@ def sign_in_user():
         try:
             connector = pymysql.connect(host='localhost', user='root', password='1234')
             my_cursor = connector.cursor()
-        except:
-            messagebox.showerror('Database error', 'Failed to connect to database, try again later')
+        except pymysql.err.OperationalError as e:
+            messagebox.showerror('Database error', f'Failed to connect to database: {str(e)}')
+            return
+        except pymysql.err.InternalError as e:
+            messagebox.showerror('Database error', f'Error executing query: {str(e)}')
+            return
+        except pymysql.err.ProgrammingError as e:
+            messagebox.showerror('Programming error', f'Error in programming: {str(e)}')
             return
 
         query = 'use userdata'
@@ -65,6 +80,133 @@ def sign_in_user():
             messagebox.showerror('Incorrect input data', 'Invalid email or password')
         else:
             messagebox.showinfo('Success', 'Login successful')
+            clear_entry_fields()
+            login_window.destroy()
+
+
+def send_email(to_email, subject, body):
+    # set up the SMTP server
+    smtp_server = "smtp.gmail.com"
+    smtp_port = 587  # or 465 for SSL/TLS encrypted connection
+    sender_email = "your_email@gmail.com"
+    sender_password = "your_email_password"
+    receiver_email = to_email
+
+    # create a message
+    message = MIMEMultipart()
+    message["From"] = sender_email
+    message["To"] = receiver_email
+    message["Subject"] = subject
+
+    # add body to the message
+    message.attach(MIMEText(body, "plain"))
+
+    # send the message
+    try:
+        with smtplib.SMTP(smtp_server, smtp_port) as server:
+            server.starttls()
+            server.login(sender_email, sender_password)
+            server.sendmail(sender_email, receiver_email, message.as_string())
+            global f_submit_clicked
+            f_submit_clicked = True
+
+    except smtplib.SMTPConnectError:
+        messagebox.showerror('Connection failure', 'Failed to connect to the SMTP server')
+        return
+    except smtplib.SMTPAuthenticationError:
+        messagebox.showerror('Connection failure', 'SMTP authentication error occurred')
+
+
+def reset_password(secret_code):
+    global f_window
+    if f_password_entry.get() == '' or f_code_entry.get() == '' or f_password_entry.get() == '' \
+            or f_confirm_password_entry.get() == '':
+        messagebox.showerror('Incorrect input data', 'All entry fields are required')
+    elif f_password_entry.get() != f_confirm_password_entry.get():
+        messagebox.showerror('Incorrect input data', 'Password mismatch')
+    elif not validate_email(f_email_entry.get()):
+        messagebox.showerror('Incorrect input data', 'Invalid email format')
+    else:
+        if f_code_entry.get() == secret_code:
+            messagebox.showinfo('Success', 'Successfully changed password')
+            time.sleep(5)
+            if f_window is not None:
+                f_window.destroy()
+        else:
+            messagebox.showerror('Authentication error', '')
+            time.sleep(5)
+            f_window.destroy()
+
+
+def change_password():
+    global f_email_entry, f_code_entry, f_password_entry, f_confirm_password_entry, f_submit_clicked, f_window
+
+    f_window = Toplevel()
+    f_window.geometry('800x500')
+    f_window.title('Change password')
+    f_window.configure(bg="#fff")
+    f_window.resizable(False, False)
+
+    f_image_open = Image.open("assets/img4.jpg")
+    f_image_open = f_image_open.resize((450, 450))
+    f_img = ImageTk.PhotoImage(f_image_open)
+
+    f_bg_label = Label(f_window, image=f_img, bg='white')
+    f_bg_label.grid()
+
+    f_frame = Frame(f_window, width=350, height=350, bg="white")
+    f_frame.place(x=450, y=60)
+
+    f_heading = Label(f_frame, text='Change password', fg=forestgreen, bg='white',
+                      font=('Microsoft YaHei UI Light', 24, 'bold'))
+    f_heading.grid(row=0, column=0)
+
+    f_email_label = Label(f_frame, text='Email', font=('Microsoft YaHei UI Light', 11), bg='white')
+    f_email_label.grid(row=1, column=0, sticky='w', pady=4)
+
+    f_email_entry = Entry(f_frame, width=30, fg='black', border=1, bg='white', font=('Microsoft YaHei UI Light', 11))
+    f_email_entry.grid(row=2, column=0, sticky='w', pady=4)
+
+    alphabet = string.ascii_uppercase + string.digits
+    secret_code = ''.join(secrets.choice(alphabet) for _ in range(8))
+    body = f'Hello,\n\nYou have requested to reset your password. Please enter the following verification code on the password reset page:\n\n{secret_code}\n\nIf you did not request a password reset, please disregard this email.\n\nThank you,'
+
+    f_submit_button = Button(f_frame, text='Send code', width=10, height=2,
+                             font=('Microsoft YaHei UI Light', 10, 'bold'),
+                             bg=limegreen, fg='white', activebackground=limegreen, activeforeground='white',
+                             cursor='hand2', border=0,
+                             command=lambda: send_email(f_email_entry.get(), 'Email confirmation', body))
+    f_submit_button.grid(row=2, column=0, sticky='w', padx=250, pady=4)
+
+    # Check if the submit button has been clicked
+    if f_submit_clicked:
+        f_code_label = Label(f_frame, text='Email code', font=('Microsoft YaHei UI Light', 11), bg='white')
+        f_code_label.grid(row=3, column=0, sticky='w', pady=4)
+
+        f_code_entry = Entry(f_frame, width=30, fg='black', border=1, bg='white', font=('Microsoft YaHei UI Light', 11))
+        f_code_entry.grid(row=4, column=0, sticky='w', pady=4)
+
+        f_password_label = Label(f_frame, text='Password', font=('Microsoft YaHei UI Light', 11), bg='white')
+        f_password_label.grid(row=5, column=0, sticky='w', pady=4)
+
+        f_password_entry = Entry(f_frame, width=30, fg='black', border=1, bg='white',
+                                 font=('Microsoft YaHei UI Light', 11))
+        f_password_entry.grid(row=6, column=0, sticky='w', pady=4)
+
+        f_confirm_password_label = Label(f_frame, text='Confirm Password', font=('Microsoft YaHei UI Light', 11),
+                                         bg='white')
+        f_confirm_password_label.grid(row=7, column=0, sticky='w', pady=4)
+
+        f_confirm_password_entry = Entry(f_frame, width=30, fg='black', border=1, bg='white',
+                                         font=('Microsoft YaHei UI Light', 11))
+        f_confirm_password_entry.grid(row=8, column=0, sticky='w', pady=4)
+
+        f_reset_button = Button(f_frame, text='Reset password', width=30, height=2,
+                                font=('Microsoft YaHei UI Light', 12),
+                                bg=limegreen, fg='white', activebackground=limegreen, activeforeground='white',
+                                cursor='hand2', border=0, command=lambda: reset_password(secret_code))
+        f_reset_button.grid(row=9, column=0, sticky='w', pady=6)
+    f_window.mainloop()
 
 
 def password_enter(entry):
@@ -137,9 +279,9 @@ eye_button = Button(login_window, image=open_eye, bg='white', activebackground='
                     cursor='hand2', command=hide_input)
 eye_button.place(x=840, y=233)
 
-forget_button = Button(login_window, text='Forgot Password?', bg='white', fg='black', border=0, cursor='hand2',
-                       activebackground='white', font=('Microsoft YaHei UI Light', 9))
-forget_button.place(x=780, y=280)
+forgot_button = Button(login_window, text='Forgot Password?', bg='white', fg='black', border=0, cursor='hand2',
+                       activebackground='white', font=('Microsoft YaHei UI Light', 9), command=change_password)
+forgot_button.place(x=780, y=280)
 
 sign_in_button = Button(frame, width=39, pady=7, text='Sign in', bg=limegreen, fg='white', border=0,
                         command=sign_in_user, activebackground=limegreen)
